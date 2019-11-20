@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <center>
+        <h1>Quản lý sinh viên</h1>
+    </center>
+
+    <div class="container"></div>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-4">
+            <center id="add">
+                Student name:
+                <input type="text" id="studentName" value=""><br><br>
+                Class:
+                <input type="text" id="clas" value=""><br><br>
+                Score:
+                <input type="text" id="jsScore" value=""><br><br>
+                Score:
+                <input type="text" id="androidScore" value=""><br><br>
+                <button onclick="getdata()">ADD</button>
+                </center>
+        </div>
+        <div class="col-sm-4"></div>
+    </div>
+    </div>
+
+    <div class="container">
+        <h2>LIST STUDENT</h2>                                                
+         <button onclick="displayFormAddBlock()">ADD STUDENT</button>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Class</th>
+                    <th scope="col">JS Score</th>
+                    <th scope="col">Android Score</th>
+                    <th scope="col">Average</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="studentList"></tbody>
+        </table>
+    </div>
+
+    <script id="text/javascript">
+
+        var students = JSON.parse(localStorage.getItem('students'));
+
+        if (!students) {
+            students = []
+            localStorage.setItem('students', JSON.stringify(students));
+        }
+
+        function getdata() {
+            var studentID = students.length +1;
+            console.log(studentID);
+            var studentName = document.getElementById("studentName").value;
+            var studentClass = document.getElementById("clas").value;
+            var score1 = document.getElementById("jsScore").value;
+            var score2 = document.getElementById("androidScore").value;
+            var averageScore=parseInt((parseInt(score1)+parseInt(score2))/2);
+
+            let newStudent = { studentID, studentName, studentClass, score1, score2, averageScore };
+            console.log(newStudent)
+            students.push(newStudent);
+
+            localStorage.setItem("students", JSON.stringify(students));
+            loadStudent(students);
+            document.getElementById('add').style.display="none";
+
+        }
+
+        // storedNames = JSON.parse(localStorage.getItem('student'));
+        // if (storedNames === null || storedNames === undefined) {
+        //     localStorage.setItem('student', JSON.stringify(students));
+        //     storedNames = JSON.parse(localStorage.getItem('student'))
+        // }
+        // console.log(storedNames);
+        // console.log(Students);
+
+        function generateStudentsHtml(students, index) {
+            return `
+                        <tr>
+                            <th scope="row">${students.studentID}</th>
+                            
+                            <td>
+                                <input style="border-width:2px; type="text" id="${students.studentID}-name" value="${students.studentName}" readonly></td>
+                            <td>
+                               <input style="border-width:2px; type="text" id="${students.studentID}-name" value="${students.studentClass}" readonly></td>
+                            </td>
+                            <td>
+                                <input style="border-width:2px;; type="text" id="${students.studentID}-name" value="${students.score1}" readonly></td>
+                            </td>
+                            <td>
+                                <input style="border-width:2px; type="text" id="${students.studentID}-name" value="${students.score2}" readonly></td>
+                            </td>
+                            <td>
+                                <input style="border-width:2px; type="text" id="${students.studentID}-name" value="${(students.averageScore)}" readonly></td>
+                            </td>
+                            <td>
+                                <input style="border-width:2px; type="text" id="${students.studentID}-name" value=`+checkAverage(students) +` readonly></td>
+                            </td>
+                            <td>
+                                 <a class="" onClick="editStudent(event, '${students.studentID}')" ><i class="fa fa-pencil edit" id="edit${students.studentID}" data-id="${index}" aria-hidden="true"></i><a>
+                                <a onclick = "editStudentClick(${students.studentID})"><i class="fa fa-floppy-o save" aria-hidden="true" id="save${students.studentID}" hidden data-id="${index}"></i></a>
+                                <a class="" onClick="deleteStudent(event, '${students.studentID}')" ><i class="fa fa-trash-o" id="delete" data-id="${index}" aria-hidden="true">
+                                        <img style="width: 30px;  " src="../images.jfif" alt=" " /></i></a>
+                                
+                            <td>
+                        </tr>
+                        `;
+        }
+//load list student
+        function loadStudent(listdata) {
+            let studentHtml = listdata.reduce((html, students, classes) => html += this.generateStudentsHtml(students, classes), "");
+            document.getElementById('studentList').innerHTML = studentHtml;
+        }
+
+
+//xoa student
+        function deleteStudent(event, studentID) {
+            var result = confirm("Are you sure to delete?");
+            if (result) {
+                let index = students.findIndex(stt => stt.studentID == studentID)
+                console.log(index)
+                students.splice(index, 1);
+                localStorage.setItem('items', JSON.stringify(students));
+                this.loadStudent(students);
+            }
+        }
+
+// hien thi form add student
+        function displayFormAddBlock(){
+            document.getElementById('add').style.display="block";
+        }
+
+        function checkAverage(students){
+            var average = students.averageScore
+        if(average>8){
+            return "Verygood";
+        } else if(average>7){
+            return "good";
+        }else{
+            return "normal"
+        }
+                }
+        
+    </script>
+
+</body>
+
+</html>
